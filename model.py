@@ -29,7 +29,7 @@ def format_status(status, max_length=40):
     return textwrap.shorten(status, width=max_length, placeholder="...")
 
 async def test_model(session, model, api_key):
-    url = f"{os.getenv('OPENAI_API_BASE', 'https://api.deep-foundation.tech/v1')}/chat/completions"
+    url = f"{os.getenv('OPENAI_API_BASE', 'https://api.deep.assistant.run.place/v1')}/chat/completions"
     
     headers = {
         "Authorization": f"Bearer {api_key}",

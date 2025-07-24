@@ -131,7 +131,7 @@ function buildMarkdownTable(headers, rows, alignments = []) {
 }
 
 async function testModel(model, apiKey) {
-  const baseUrl = process.env.OPENAI_API_BASE || 'https://api.deep-foundation.tech/v1';
+  const baseUrl = process.env.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1';
   const url = `${baseUrl}/chat/completions`;
   const headers = {
     'Authorization': `Bearer ${apiKey}`,
