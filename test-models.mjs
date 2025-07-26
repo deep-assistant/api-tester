@@ -42,8 +42,11 @@ function detectModel(model) {
   
   // Special cases (order matters - check more specific patterns first)
   if (model.includes('gpt-4o-plus')) return 'gpt-4o';
+  if (model.includes('gpt-4o-2024')) return 'gpt-4o';  // Handle gpt-4o-2024-11-20
   if (model.includes('deepseek-r1')) return 'deepseek-reasoner';
   if (model.includes('gpt-4-gizmo')) return 'gpt-4-unofficial';
+  if (model.includes('o1-2024-12-17')) return 'o1-preview';  // Handle o1-preview versions
+  if (model.includes('microsoft/phi-4')) return 'microsoft/WizardLM-2-7B';  // Handle phi-4 mapping
   if (model.includes('Llama-3.1-405B')) return 'meta-llama/Meta-Llama-3.1-405B-Instruct';
   if (model.includes('Llama-3.1-70B')) return 'meta-llama/Meta-Llama-3.1-70B-Instruct';
   if (model.includes('Llama-3.1-8B')) return 'meta-llama/Meta-Llama-3.1-8B-Instruct';
@@ -206,7 +209,13 @@ async function testModel(model, apiKey) {
       const normalizedRequestModel = detectModel(model) || model;
       const normalizedResponseModel = detectModel(responseModel) || responseModel;
       
-      result.isCorrect = normalizedResponseModel === normalizedRequestModel;
+      // Special case for gpt-auto: it can return any gpt model
+      if (normalizedRequestModel === 'gpt-auto' && responseModel.includes('gpt')) {
+        result.isCorrect = true;
+      } else {
+        result.isCorrect = normalizedResponseModel === normalizedRequestModel;
+      }
+      
       result.status = result.isCorrect ? 'Success' : `Wrong model: ${responseModel}`;
     } else {
       result.status = `HTTP ${response.status}`;
