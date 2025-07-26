@@ -110,6 +110,7 @@ const tryCompletionsConfig = {
   'gpt-4.1-mini': [],
   'gpt-4.1-nano': [],
   'gpt-4o': [],
+  'gpt-4o-image': [],
   'gpt-4o-realtime-preview': [],
   'gpt-4o-transcribe': [],
   'gpt-4o-search-preview': [],
@@ -134,11 +135,33 @@ const tryCompletionsConfig = {
   'tts-1-hd': [],
   'whisper-1': [],
   'claude-3-opus': [],
+  'claude-3-opus-20240229': [],
+  'claude-3-opus-20240307': [],
+  'claude-3-opus-latest': [],
+  'claude-3-haiku': [],
+  'claude-3-haiku-20240229': [],
+  'claude-3-haiku-20240307': [],
+  'claude-3-haiku-latest': [],
+  'claude-4': [],
   'claude-4-opus': [],
+  'claude-opus-4-0': [],
+  'claude-4-opus-20250514': [],
+  'claude-opus-4-20250514': [],
   'claude-3-5-sonnet': [],
+  'claude-3-5-sonnet-20240620': [],
+  'claude-3-5-sonnet-20241022': [],
+  'claude-3-5-sonnet-latest': [],
   'claude-3-5-haiku': [],
+  'claude-3-5-haiku-20240620': [],
+  'claude-3-5-haiku-20241022': [],
+  'claude-3-5-haiku-latest': [],
   'claude-3-7-sonnet': [],
+  'claude-3-7-sonnet-20250219': [],
+  'claude-3-7-sonnet-latest': [],
   'claude-4-sonnet': [],
+  'claude-sonnet-4-0': [],
+  'claude-4-sonnet-20250514': [],
+  'claude-sonnet-4-20250514': [],
   'deepseek-chat': [],
   'deepseek-reasoner': [],
 
@@ -297,7 +320,7 @@ async function testModel(model, apiKey) {
         if (errorData.error && errorData.error.message) {
           result.status += `: ${errorData.error.message}`;
         }
-        // console.error(`Error response for model ${model}:`, errorData);
+        console.error(`Error response for model ${model}:`, errorData);
       } catch (e) {
         // ignore JSON parse errors
       }
