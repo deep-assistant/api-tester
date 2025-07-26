@@ -249,6 +249,7 @@ function buildMarkdownTable(headers, rows, alignments = []) {
 
 async function testModel(model, apiKey) {
   const baseUrl = process.env.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1';
+  // console.log(`baseUrl: ${baseUrl}`);
   const url = `${baseUrl}/chat/completions`;
   const headers = {
     'Authorization': `Bearer ${apiKey}`,
@@ -296,6 +297,7 @@ async function testModel(model, apiKey) {
         if (errorData.error && errorData.error.message) {
           result.status += `: ${errorData.error.message}`;
         }
+        // console.error(`Error response for model ${model}:`, errorData);
       } catch (e) {
         // ignore JSON parse errors
       }
