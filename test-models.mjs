@@ -10,6 +10,49 @@ const { use } = eval(
 const dotenv = await use('dotenv@16.1.4');
 dotenv.config();
 
+// Model detection function based on Python version
+function detectModel(model) {
+  if (!model) return null;
+  
+  // Define GPT model mappings
+  const GPTModels = {
+    'o3-mini': 'o3-mini',
+    'o1-preview': 'o1-preview',
+    'o1-mini': 'o1-mini',
+    'gpt-4o': 'gpt-4o',
+    'gpt-4o-mini': 'gpt-4o-mini',
+    'gpt-3.5-turbo': 'gpt-3.5-turbo',
+    'claude-3-opus': 'claude-3-opus',
+    'claude-3-5-sonnet': 'claude-3-5-sonnet',
+    'claude-3-5-haiku': 'claude-3-5-haiku',
+    'claude-3-7-sonnet': 'claude-3-7-sonnet',
+    'deepseek-chat': 'deepseek-chat',
+    'deepseek-reasoner': 'deepseek-reasoner',
+    'gpt-auto': 'gpt-auto',
+    'microsoft/WizardLM-2-7B': 'microsoft/WizardLM-2-7B',
+    'microsoft/WizardLM-2-8x22B': 'microsoft/WizardLM-2-8x22B',
+  };
+  
+  // Check exact matches first
+  for (const [key, value] of Object.entries(GPTModels)) {
+    if (model.includes(value)) {
+      return value;
+    }
+  }
+  
+  // Special cases (order matters - check more specific patterns first)
+  if (model.includes('gpt-4o-plus')) return 'gpt-4o';
+  if (model.includes('deepseek-r1')) return 'deepseek-reasoner';
+  if (model.includes('gpt-4-gizmo')) return 'gpt-4-unofficial';
+  if (model.includes('Llama-3.1-405B')) return 'meta-llama/Meta-Llama-3.1-405B-Instruct';
+  if (model.includes('Llama-3.1-70B')) return 'meta-llama/Meta-Llama-3.1-70B-Instruct';
+  if (model.includes('Llama-3.1-8B')) return 'meta-llama/Meta-Llama-3.1-8B-Instruct';
+  if (model.includes('Llama-3.3-70B')) return 'meta-llama/Meta-Llama-3.3-70B-Instruct';
+  if (model.includes('auto')) return 'gpt-auto';
+  
+  return null;
+}
+
 const tryCompletionsConfig = {
   'o3-mini': [],
   'o1-preview': [],
@@ -158,7 +201,12 @@ async function testModel(model, apiKey) {
     if (response.ok) {
       const data = await response.json();
       const responseModel = data.model || '';
-      result.isCorrect = responseModel === model;
+      
+      // Use detectModel to normalize both requested and response models
+      const normalizedRequestModel = detectModel(model) || model;
+      const normalizedResponseModel = detectModel(responseModel) || responseModel;
+      
+      result.isCorrect = normalizedResponseModel === normalizedRequestModel;
       result.status = result.isCorrect ? 'Success' : `Wrong model: ${responseModel}`;
     } else {
       result.status = `HTTP ${response.status}`;
