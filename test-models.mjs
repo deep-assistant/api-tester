@@ -16,16 +16,51 @@ function detectModel(model) {
   
   // Define GPT model mappings
   const GPTModels = {
+    'o4-mini': 'o4-mini',
+    'o4-mini-high': 'o4-mini-high',
+    'o4-mini-deep-research': 'o4-mini-deep-research',
     'o3-mini': 'o3-mini',
+    'o3-mini-high': 'o3-mini-high',
+    'o3': 'o3',
+    'o3-pro': 'o3-pro',
+    'o3-deep-research': 'o3-deep-research',
+    'o1': 'o1',
+    'o1-pro': 'o1-pro',
     'o1-preview': 'o1-preview',
     'o1-mini': 'o1-mini',
+    'gpt-4.5': 'gpt-4.5',
+    'gpt-4.1': 'gpt-4.1',
+    'gpt-4.1-mini': 'gpt-4.1-mini',
+    'gpt-4.1-nano': 'gpt-4.1-nano',
     'gpt-4o': 'gpt-4o',
+    'gpt-4o-realtime-preview': 'gpt-4o-realtime-preview',
+    'gpt-4o-transcribe': 'gpt-4o-transcribe',
+    'gpt-4o-search-preview': 'gpt-4o-search-preview',
+    'gpt-4o-audio-preview': 'gpt-4o-audio-preview',
+    'chatgpt-4o-latest': 'chatgpt-4o-latest',
     'gpt-4o-mini': 'gpt-4o-mini',
+    'gpt-4o-mini-tts': 'gpt-4o-mini-tts',
+    'gpt-4o-mini-realtime-preview': 'gpt-4o-mini-realtime-preview',
+    'gpt-4o-mini-transcribe': 'gpt-4o-mini-transcribe',
+    'gpt-4o-mini-search-preview': 'gpt-4o-mini-search-preview',
+    'gpt-4o-mini-audio-preview': 'gpt-4o-mini-audio-preview',
+    'gpt-4': 'gpt-4',
+    'gpt-4-turbo': 'gpt-4-turbo',
     'gpt-3.5-turbo': 'gpt-3.5-turbo',
+    'computer-use-preview': 'computer-use-preview',
+    'codex-mini-latest': 'codex-mini-latest',
+    'gpt-image-1': 'gpt-image-1',
+    'dall-e-3': 'dall-e-3',
+    'dall-e-2': 'dall-e-2',
+    'tts-1': 'tts-1',
+    'tts-1-hd': 'tts-1-hd',
+    'whisper-1': 'whisper-1',
     'claude-3-opus': 'claude-3-opus',
+    'claude-4-opus': 'claude-4-opus',
     'claude-3-5-sonnet': 'claude-3-5-sonnet',
     'claude-3-5-haiku': 'claude-3-5-haiku',
     'claude-3-7-sonnet': 'claude-3-7-sonnet',
+    'claude-4-sonnet': 'claude-4-sonnet',
     'deepseek-chat': 'deepseek-chat',
     'deepseek-reasoner': 'deepseek-reasoner',
     'gpt-auto': 'gpt-auto',
@@ -46,7 +81,7 @@ function detectModel(model) {
   if (model.includes('deepseek-r1')) return 'deepseek-reasoner';
   if (model.includes('gpt-4-gizmo')) return 'gpt-4-unofficial';
   if (model.includes('o1-2024-12-17')) return 'o1-preview';  // Handle o1-preview versions
-  if (model.includes('microsoft/phi-4')) return 'microsoft/WizardLM-2-7B';  // Handle phi-4 mapping
+  // if (model.includes('microsoft/phi-4')) return 'microsoft/WizardLM-2-7B';  // Do not handle phi-4 mapping
   if (model.includes('Llama-3.1-405B')) return 'meta-llama/Meta-Llama-3.1-405B-Instruct';
   if (model.includes('Llama-3.1-70B')) return 'meta-llama/Meta-Llama-3.1-70B-Instruct';
   if (model.includes('Llama-3.1-8B')) return 'meta-llama/Meta-Llama-3.1-8B-Instruct';
@@ -57,17 +92,53 @@ function detectModel(model) {
 }
 
 const tryCompletionsConfig = {
+  'o4-mini': [],
+  'o4-mini-high': [],
+  'o4-mini-deep-research': [],
+  
   'o3-mini': [],
+  'o3-mini-high': [],
+  'o3': [],
+  'o3-pro': [],
+  'o3-deep-research': [],
+  'o1': [],
+  'o1-pro': [],
   'o1-preview': [],
   'o1-mini': [],
+  'gpt-4.5': [],
+  'gpt-4.1': [],
+  'gpt-4.1-mini': [],
+  'gpt-4.1-nano': [],
   'gpt-4o': [],
+  'gpt-4o-realtime-preview': [],
+  'gpt-4o-transcribe': [],
+  'gpt-4o-search-preview': [],
+  'gpt-4o-audio-preview': [],
+  'chatgpt-4o-latest': [],
   'gpt-4o-mini': [],
+  'gpt-4o-mini-tts': [],
+  'gpt-4o-mini-realtime-preview': [],
+  'gpt-4o-mini-transcribe': [],
+  'gpt-4o-mini-search-preview': [],
+  'gpt-4o-mini-audio-preview': [],
+  'gpt-4': [],
+  'gpt-4-turbo': [],
   'gpt-3.5-turbo': [],
   'gpt-auto': [],
+  'computer-use-preview': [],
+  'codex-mini-latest': [],
+  'gpt-image-1': [],
+  'dall-e-3': [],
+  'dall-e-2': [],
+  'tts-1': [],
+  'tts-1-hd': [],
+  'whisper-1': [],
   'claude-3-opus': [],
+  'claude-4-opus': [],
   'claude-3-5-sonnet': [],
   'claude-3-5-haiku': [],
   'claude-3-7-sonnet': [],
+  'claude-4-sonnet': [],
   'deepseek-chat': [],
   'deepseek-reasoner': [],
 
@@ -190,7 +261,7 @@ async function testModel(model, apiKey) {
   };
 
   const startTime = Date.now();
-  const result = { model, status: '', responseTime: 0, isCorrect: false };
+  const result = { model, status: '', responseTime: 0, isCorrect: false, actualModel: '' };
 
   try {
     const response = await fetch(url, {
@@ -204,6 +275,7 @@ async function testModel(model, apiKey) {
     if (response.ok) {
       const data = await response.json();
       const responseModel = data.model || '';
+      result.actualModel = responseModel;
       
       // Use detectModel to normalize both requested and response models
       const normalizedRequestModel = detectModel(model) || model;
@@ -248,14 +320,15 @@ const results = await Promise.all(models.map(model => testModel(model, apiKey)))
 const totalTime = results.reduce((sum, r) => sum + r.responseTime, 0);
 
 console.log('\nTest Results:');
-const headers = ['Model', 'Status', 'Time', 'Working'];
+const headers = ['Model', 'Actual Model', 'Status', 'Time', 'Working'];
 const rows = results.map(r => [
   r.model,
+  r.actualModel || 'N/A',
   formatStatus(r.status),
   r.responseTime.toFixed(2),
   r.isCorrect ? '🟩' : '🟥'
 ]);
-console.log(buildMarkdownTable(headers, rows, ['left', 'left', 'right', 'center']));
+console.log(buildMarkdownTable(headers, rows, ['left', 'left', 'left', 'right', 'center']));
 
 console.log(`\nTotal tested: ${models.length} models`);
 console.log(`Successful responses: ${results.filter(r => r.isCorrect).length}`);
