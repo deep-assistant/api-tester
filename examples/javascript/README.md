@@ -4,9 +4,14 @@ This example demonstrates how to use the Deep.Assistant API with JavaScript/Node
 
 ## Setup
 
-1. Configure your API credentials in `.env`:
+1. Copy the example environment file and configure your API credentials:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Then edit `.env` with your API credentials:
    ```env
-   OPENAI_API_KEY=your_api_key_here
+   OPENAI_API_KEY=YOUR_TOKEN_HERE
    OPENAI_API_BASE=https://api.deep.assistant.run.place/v1
    ```
 
