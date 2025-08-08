@@ -1,0 +1,18 @@
+{
+  "name": "api-tester",
+  "version": "1.0.0",
+  "description": "API testing examples for Deep.Assistant",
+  "type": "module",
+  "main": "example.js",
+  "scripts": {
+    "test": "node example.js",
+    "start": "node example.js"
+  },
+  "dependencies": {
+    "openai": "^4.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "keywords": ["openai", "api", "testing"],
+  "author": "Deep.Assistant",
+  "license": "Unlicense"
+}
