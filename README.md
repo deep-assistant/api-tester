@@ -2,44 +2,27 @@
 
 Testing examples for Deep.Assistant API Gateway that demonstrate OpenAI-compatible usage.
 
-## Setup
+## Examples
 
-1. Copy the `.env` file and configure your API credentials:
+This repository contains examples in different programming languages:
+
+- **[JavaScript Example](examples/javascript/)** - Node.js example using the OpenAI SDK
+- **[Python Example](examples/python/)** - Python example using the OpenAI SDK
+
+Each example directory contains:
+- Complete working code
+- Dependencies file (package.json or requirements.txt)
+- Environment configuration (.env)
+- Detailed README with setup instructions
+
+## Quick Start
+
+1. Navigate to your preferred language example:
    ```bash
-   cp .env .env.local  # optional: create local copy
+   cd examples/javascript  # or examples/python
    ```
 
-2. Set your API key and base URL in `.env`:
-   ```env
-   OPENAI_API_KEY=your_api_key_here
-   OPENAI_API_BASE=https://api.deep.assistant.run.place/v1
-   ```
-
-## JavaScript Example
-
-Install dependencies:
-```bash
-npm install
-```
-
-Run the JavaScript example:
-```bash
-npm start
-# or
-node example.js
-```
-
-## Python Example
-
-Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-Run the Python example:
-```bash
-python example.py
-```
+2. Follow the README instructions in that directory
 
 ## API Key
 
