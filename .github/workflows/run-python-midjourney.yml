@@ -1,0 +1,49 @@
+name: Run Python Midjourney Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Midjourney prompt for image generation'
+        required: false
+        default: 'A beautiful sunset over the snow mountains --v 7'
+        type: string
+
+jobs:
+  run-example:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: examples/python/requirements.txt
+
+      - name: Install dependencies
+        working-directory: examples/python
+        run: pip install -r requirements.txt
+
+      - name: Create .env file
+        working-directory: examples/python
+        run: |
+          echo "LEGNEXT_API_KEY=${{ secrets.LEGNEXT_API_KEY }}" >> .env
+          echo "LEGNEXT_API_BASE=https://api.legnext.ai/api" >> .env
+
+      - name: Run Midjourney example
+        working-directory: examples/python
+        run: python midjourney_example.py
+        env:
+          PROMPT: ${{ inputs.prompt }}
+
+      - name: Upload execution logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-logs-${{ github.run_number }}
+          path: examples/python/*.log
+          if-no-files-found: ignore

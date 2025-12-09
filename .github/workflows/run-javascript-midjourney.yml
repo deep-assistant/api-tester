@@ -1,0 +1,49 @@
+name: Run JavaScript Midjourney Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Midjourney prompt for image generation'
+        required: false
+        default: 'A beautiful sunset over the snow mountains --v 7'
+        type: string
+
+jobs:
+  run-example:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: examples/javascript/package-lock.json
+
+      - name: Install dependencies
+        working-directory: examples/javascript
+        run: npm ci
+
+      - name: Create .env file
+        working-directory: examples/javascript
+        run: |
+          echo "LEGNEXT_API_KEY=${{ secrets.LEGNEXT_API_KEY }}" >> .env
+          echo "LEGNEXT_API_BASE=https://api.legnext.ai/api" >> .env
+
+      - name: Run Midjourney example
+        working-directory: examples/javascript
+        run: node midjourney-example.js
+        env:
+          PROMPT: ${{ inputs.prompt }}
+
+      - name: Upload execution logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-logs-${{ github.run_number }}
+          path: examples/javascript/*.log
+          if-no-files-found: ignore
