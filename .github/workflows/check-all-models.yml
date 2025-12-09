@@ -1,0 +1,123 @@
+name: Check All Models
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Specific models to test (space-separated, leave empty for all)'
+        required: false
+        type: string
+  schedule:
+    # Run daily at 6:00 UTC
+    - cron: '0 6 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'check_models.py'
+      - 'check_models.js'
+      - 'requirements.txt'
+      - 'package.json'
+      - '.github/workflows/check-all-models.yml'
+
+jobs:
+  check-models-python:
+    name: Python Model Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check all models
+        if: github.event.inputs.models == ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: python check_models.py
+
+      - name: Check specific models
+        if: github.event.inputs.models != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: python check_models.py ${{ github.event.inputs.models }}
+
+      - name: Upload Python results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-model-check-results
+          path: |
+            *.log
+          retention-days: 30
+
+  check-models-javascript:
+    name: JavaScript Model Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check all models
+        if: github.event.inputs.models == ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: node check_models.js
+
+      - name: Check specific models
+        if: github.event.inputs.models != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: node check_models.js ${{ github.event.inputs.models }}
+
+      - name: Upload JavaScript results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-model-check-results
+          path: |
+            *.log
+          retention-days: 30
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [check-models-python, check-models-javascript]
+    if: always()
+
+    steps:
+      - name: Check job results
+        run: |
+          echo "Python Check: ${{ needs.check-models-python.result }}"
+          echo "JavaScript Check: ${{ needs.check-models-javascript.result }}"
+
+          if [ "${{ needs.check-models-python.result }}" != "success" ] || [ "${{ needs.check-models-javascript.result }}" != "success" ]; then
+            echo "⚠️ One or more model checks failed"
+            exit 1
+          else
+            echo "✅ All model checks passed"
+          fi

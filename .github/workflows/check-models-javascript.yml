@@ -1,0 +1,59 @@
+name: Check Models - JavaScript
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Specific models to test (space-separated, leave empty for all)'
+        required: false
+        type: string
+  schedule:
+    # Run daily at 6:00 UTC
+    - cron: '0 6 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'check_models.js'
+      - 'package.json'
+      - '.github/workflows/check-models-javascript.yml'
+
+jobs:
+  check-models:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check all models
+        if: github.event.inputs.models == ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: node check_models.js
+
+      - name: Check specific models
+        if: github.event.inputs.models != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: node check_models.js ${{ github.event.inputs.models }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-model-check-results
+          path: |
+            *.log
+          retention-days: 30

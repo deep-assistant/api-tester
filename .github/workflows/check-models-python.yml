@@ -1,0 +1,61 @@
+name: Check Models - Python
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        description: 'Specific models to test (space-separated, leave empty for all)'
+        required: false
+        type: string
+  schedule:
+    # Run daily at 6:00 UTC
+    - cron: '0 6 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - 'check_models.py'
+      - 'requirements.txt'
+      - '.github/workflows/check-models-python.yml'
+
+jobs:
+  check-models:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Check all models
+        if: github.event.inputs.models == ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: python check_models.py
+
+      - name: Check specific models
+        if: github.event.inputs.models != ''
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_BASE: ${{ vars.OPENAI_API_BASE || 'https://api.deep.assistant.run.place/v1' }}
+        run: python check_models.py ${{ github.event.inputs.models }}
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-model-check-results
+          path: |
+            *.log
+          retention-days: 30
