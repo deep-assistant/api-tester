@@ -1,0 +1,16 @@
+{
+  "name": "api-tester-model-checker",
+  "version": "1.0.0",
+  "description": "Model availability checker for Deep.Assistant API",
+  "type": "module",
+  "main": "check_models.js",
+  "scripts": {
+    "check": "node check_models.js"
+  },
+  "dependencies": {
+    "openai": "^4.0.0"
+  },
+  "keywords": ["openai", "api", "testing", "models"],
+  "author": "Deep.Assistant",
+  "license": "Unlicense"
+}
