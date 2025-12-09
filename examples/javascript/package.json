@@ -6,11 +6,13 @@
   "main": "example.js",
   "scripts": {
     "test": "node example.js",
-    "start": "node example.js"
+    "start": "node example.js",
+    "midjourney": "node midjourney-example.js"
   },
   "dependencies": {
     "openai": "^4.0.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "node-fetch": "^3.3.0"
   },
   "keywords": ["openai", "api", "testing"],
   "author": "Deep.Assistant",
