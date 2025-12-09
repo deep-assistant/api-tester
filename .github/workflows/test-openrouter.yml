@@ -1,0 +1,144 @@
+name: Test OpenRouter Models
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      test_language:
+        description: 'Language to test (javascript, python, or both)'
+        required: false
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - javascript
+          - python
+  push:
+    branches:
+      - main
+    paths:
+      - 'test-openrouter-models.mjs'
+      - 'test-openrouter-models.py'
+      - '.github/workflows/test-openrouter.yml'
+
+jobs:
+  test-javascript:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.test_language == 'both' || github.event.inputs.test_language == 'javascript'
+    runs-on: ubuntu-latest
+    name: Test OpenRouter Models (JavaScript)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run OpenRouter model tests
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          echo "Testing OpenRouter models with JavaScript..."
+          node test-openrouter-models.mjs > openrouter-test-results-js.log 2>&1 || true
+          cat openrouter-test-results-js.log
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openrouter-test-results-javascript
+          path: openrouter-test-results-js.log
+          retention-days: 30
+
+      - name: Check for failures
+        run: |
+          if grep -q "Successful responses: 0" openrouter-test-results-js.log; then
+            echo "::warning::No successful model responses detected"
+            exit 1
+          fi
+
+  test-python:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.test_language == 'both' || github.event.inputs.test_language == 'python'
+    runs-on: ubuntu-latest
+    name: Test OpenRouter Models (Python)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install aiohttp
+
+      - name: Run OpenRouter model tests
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          echo "Testing OpenRouter models with Python..."
+          python test-openrouter-models.py > openrouter-test-results-py.log 2>&1 || true
+          cat openrouter-test-results-py.log
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openrouter-test-results-python
+          path: openrouter-test-results-py.log
+          retention-days: 30
+
+      - name: Check for failures
+        run: |
+          if grep -q "Successful responses: 0" openrouter-test-results-py.log; then
+            echo "::warning::No successful model responses detected"
+            exit 1
+          fi
+
+  summary:
+    needs: [test-javascript, test-python]
+    if: always()
+    runs-on: ubuntu-latest
+    name: Test Summary
+
+    steps:
+      - name: Download JavaScript results
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: openrouter-test-results-javascript
+          path: ./results/
+
+      - name: Download Python results
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: openrouter-test-results-python
+          path: ./results/
+
+      - name: Create summary
+        run: |
+          echo "# OpenRouter Model Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "./results/openrouter-test-results-js.log" ]; then
+            echo "## JavaScript Results" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -20 ./results/openrouter-test-results-js.log >> $GITHUB_STEP_SUMMARY || echo "No results available" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -f "./results/openrouter-test-results-py.log" ]; then
+            echo "## Python Results" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -20 ./results/openrouter-test-results-py.log >> $GITHUB_STEP_SUMMARY || echo "No results available" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
